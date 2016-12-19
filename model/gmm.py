@@ -13,17 +13,17 @@ class GMM(object):
     def fit(self, X, T):
         for t in range(T):
             print 'iter: {0}'.format(t)
-            gamma = self.expectate(X)
+            gamma = self.expectate(X, self.pi, self.mu, self.sigma, self.K, self.d)
             pi_hat, mu_hat, sigma_hat = self.maximize(X, self.mu, gamma)
             self.update_params(pi_hat, mu_hat, sigma_hat)
 
 
-    def expectate(self, X):
-        likel_funcs = self.__likelihood_functions(self.mu, self.sigma, self.K)
-        likelihood = np.zeros((X.shape[0], self.K))
+    def expectate(self, X, pi, mu, sigma, K, d):
+        likel_funcs = self.__likelihood_functions(mu, sigma, K, d)
+        likelihood = np.zeros((X.shape[0], K))
         for(i, x) in enumerate(X):
-            likelihood[i, :] = [likel_funcs[k](x) for k in range(self.K)]
-        _gamma = self.pi * likelihood
+            likelihood[i, :] = [likel_funcs[k](x) for k in range(K)]
+        _gamma = pi * likelihood
         return _gamma / _gamma.sum(axis = 1, keepdims = True)
 
 
@@ -41,15 +41,15 @@ class GMM(object):
         self.sigma = sigma_hat
 
 
-    def __likelihood_functions(self, mu, sigma, K):
-        return [self.__likelihood_function(mu[k, :], sigma[k, :, :]) for k in range(K)]
+    def __likelihood_functions(self, mu, sigma, K, d):
+        return [self.__likelihood_function(mu[k, :], sigma[k, :, :], d) for k in range(K)]
 
 
-    def __likelihood_function(self, mu_k, sigma_k):
+    def __likelihood_function(self, mu_k, sigma_k, d):
         def gauss(x):
             _x = x - mu_k
             numer = np.exp(-0.5 * _x.dot(np.linalg.inv(sigma_k).dot(_x.T)))
-            denom = (2 * np.pi) ** (1.0 / self.d) * np.sqrt(np.abs(np.linalg.det(sigma_k)))
+            denom = (2 * np.pi) ** (1.0 / d) * np.sqrt(np.abs(np.linalg.det(sigma_k)))
             return numer / denom
         return gauss
 
