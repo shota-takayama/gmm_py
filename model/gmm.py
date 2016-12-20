@@ -49,7 +49,7 @@ class GMM(object):
         def gauss(x):
             _x = x - mu_k
             numer = np.exp(-0.5 * _x.dot(np.linalg.inv(sigma_k).dot(_x.T)))
-            denom = (2 * np.pi) ** (1.0 / d) * np.sqrt(np.abs(np.linalg.det(sigma_k)))
+            denom = (2 * np.pi) ** (d / 2.0) * np.sqrt(np.abs(np.linalg.det(sigma_k)))
             return numer / denom
         return gauss
 
